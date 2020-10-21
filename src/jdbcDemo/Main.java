@@ -29,29 +29,6 @@ public class Main {
 
         System.out.println("DB driver loaded successfully.");
 
-        // 2. Connect to DB
-        // try {
-        //     DriverManager.getConnection(DB_URL);
-        // } catch (SQLException throwables) {
-        //     System.err.printf("Cannot connect to DB: %s%n", DB_URL);
-        //     System.exit(0);
-        // }
-        //
-        // System.out.println("Connection created successfully: %s%n");
-
-        Properties props = new Properties();
-        props.setProperty("user", username);
-        props.setProperty("password", password);
-        Connection con = null;
-
-        try {
-           con = DriverManager.getConnection(DB_URL, props);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-
-        System.out.printf("DB connection successful: %s%n", DB_URL);
-
         System.out.println("Enter minimum salary (<Enter> for '40000'): ");
         String salary = sc.nextLine().trim();
         salary = salary.length() > 0 ? salary : "40000";
@@ -62,14 +39,36 @@ public class Main {
             System.err.println("Invalid number");
         }
 
-        //3. Create Prepared Statement
-        try {
+        // 2. Connect to DB
+        // try {
+        //     DriverManager.getConnection(DB_URL);
+        // } catch (SQLException throwables) {
+        //     System.err.printf("Cannot connect to DB: %s%n", DB_URL);
+        //     System.exit(0);
+        // }
+        //
+        // System.out.println("Connection created successfully: %s%n");
+
+
+        //Essential Part!
+        Properties props = new Properties();
+        props.setProperty("user", username);
+        props.setProperty("password", password);
+
+
+        // try with recourses block, Connection class implements AutoCloseable interface
+        // we do not need to close it manually
+        try (Connection con = DriverManager.getConnection(DB_URL, props)) {
+            System.out.printf("DB connection successful: %s%n", DB_URL);
+
+            //3. Create Prepared Statement
             PreparedStatement ps = con.prepareStatement("SELECT * FROM employees WHERE SALARY > ?");
+
             // 4. Execute prepared statement with parameter
             ps.setDouble(1, salaryAsDouble);
             ResultSet rs = ps.executeQuery();
 
-            //6. Print
+            //5. Print
             while (rs.next()) {
                 System.out.printf("| %10d | %-15.15s | %-15.15s | %10.2f |%n",
                         rs.getLong("employee_id"),
@@ -78,13 +77,10 @@ public class Main {
                         rs.getDouble("salary")
                         );
             }
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
 
-        //8. Close connection
-        try {
-            con.close();
+        //  6. Close connection
+        //  try {
+        //      con.close();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
