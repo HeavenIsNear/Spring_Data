@@ -8,6 +8,7 @@ import java.util.Scanner;
 public class Main {
     public static String DB_DRIVER = "com.mysql.cj.jdbc.Driver";
     public static String DB_URL = "jdbc:mysql://root:9Mx4uokkk@localhost:3306/soft_uni";
+    public static String SQL_QUERY = "SELECT * FROM employees WHERE SALARY > ?";
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -49,20 +50,17 @@ public class Main {
         //
         // System.out.println("Connection created successfully: %s%n");
 
-
         //Essential Part!
         Properties props = new Properties();
         props.setProperty("user", username);
         props.setProperty("password", password);
 
-
         // try with recourses block, Connection class implements AutoCloseable interface
         // we do not need to close it manually
-        try (Connection con = DriverManager.getConnection(DB_URL, props)) {
-            System.out.printf("DB connection successful: %s%n", DB_URL);
-
-            //3. Create Prepared Statement
-            PreparedStatement ps = con.prepareStatement("SELECT * FROM employees WHERE SALARY > ?");
+        try (Connection con = DriverManager.getConnection(DB_URL, props);
+             //3. Create Prepared Statement
+             PreparedStatement ps = con.prepareStatement(SQL_QUERY)) {
+             System.out.printf("DB connection successful: %s%n", DB_URL);
 
             // 4. Execute prepared statement with parameter
             ps.setDouble(1, salaryAsDouble);
